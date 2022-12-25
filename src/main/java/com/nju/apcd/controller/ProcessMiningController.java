@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,8 @@ public class ProcessMiningController {
     @PostMapping("/process-discovery")
     public String processDiscovery(@RequestParam List<String> repos, @RequestParam Integer scene){
         try {
+            System.out.println(repos);
+            System.out.println(scene);
             return processMiningService.processDiscovery(repos, scene);
         }catch (Exception e){
             System.err.println(e);
