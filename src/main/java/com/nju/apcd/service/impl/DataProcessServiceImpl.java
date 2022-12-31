@@ -1,12 +1,14 @@
 package com.nju.apcd.service.impl;
 
 import com.nju.apcd.service.DataProcessService;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 
+@Service
 public class DataProcessServiceImpl implements DataProcessService {
     @Override
     public String uploadEventLog(List<MultipartFile> fileList, String project) {
