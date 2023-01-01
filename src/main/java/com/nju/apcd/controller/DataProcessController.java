@@ -34,7 +34,8 @@ public class DataProcessController {
     @PostMapping("/upload-event-log")
     public String uploadEventLog(@RequestParam("fileList") List<MultipartFile> fileList,
                      @RequestParam("project") String project) {
-        return dataProcessService.uploadEventLog(fileList, project);
+        ServerResponse result = dataProcessService.uploadEventLog(fileList, project);
+        return JSON.toJSONString(result);
     }
 
 

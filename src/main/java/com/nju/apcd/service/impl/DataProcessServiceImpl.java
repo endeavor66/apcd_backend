@@ -1,5 +1,8 @@
 package com.nju.apcd.service.impl;
 
+import cn.hutool.core.io.FileUtil;
+import com.nju.apcd.constant.Constants;
+import com.nju.apcd.pojo.ServerResponse;
 import com.nju.apcd.service.DataProcessService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,9 +14,9 @@ import java.util.List;
 @Service
 public class DataProcessServiceImpl implements DataProcessService {
     @Override
-    public String uploadEventLog(List<MultipartFile> fileList, String project) {
+    public ServerResponse uploadEventLog(List<MultipartFile> fileList, String project) {
         if (fileList == null || fileList.size() == 0) {
-            return "上传文件不能为空";
+            return ServerResponse.fail("文件列表为空");
         }
         for (MultipartFile file : fileList) {
             String originalFileName = file.getOriginalFilename();
@@ -22,20 +25,15 @@ public class DataProcessServiceImpl implements DataProcessService {
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println(originalFileName + "上传失败!");
-                return "uploading fail";
+                return ServerResponse.fail("上传失败,"+e.toString());
             }
-            System.out.println(originalFileName + "上传成功!");
         }
-        return "uploading success";
+
+        return ServerResponse.ok("上传成功");
     }
 
     public void uploadFile(byte[] file, String fileName) throws Exception {
-        String file_dir = "E:/test/";
-        File targetFile = new File(file_dir);
-        if(!targetFile.exists()){
-            targetFile.mkdirs();
-        }
-        String filePath = file_dir + fileName;
+        String filePath = Constants.BIGQUERY_DATA_DIR + "/" + fileName;
         FileOutputStream out = new FileOutputStream(filePath);
         out.write(file);
         out.flush();
