@@ -147,10 +147,13 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split('#')
-    EVENT_LOG_DIR = params[1]
-    LOG_ALL_SCENE_DIR = params[2]
-    LOG_SINGLE_SCENE_DIR = params[3]
+    projects = params[0].split(',')
+    DATA_DIR = params[1]
+
+    # 文件目录
+    EVENT_LOG_DIR = DATA_DIR + "/event_log"
+    LOG_ALL_SCENE_DIR = DATA_DIR + "/log_all_scene"
+    LOG_SINGLE_SCENE_DIR = DATA_DIR + "/log_single_scene"
 
     # 执行
     for pro in projects:

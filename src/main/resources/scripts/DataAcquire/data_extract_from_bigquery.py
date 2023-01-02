@@ -77,24 +77,15 @@ def extract_data_from_bigquery_csv(filepath: str, repo: str):
     batch_insert_into_events(repo, datas)
 
 
-def auto_process(projects, start_time, end_time, dir_path):
+def auto_process(projects, dir_path):
+    file_list = os.listdir(dir_path)
+    print(f"{dir_path}目录中共检测到{len(file_list)}份文件")
     for pro in projects:
         repo = pro.split('/')[1]
-        index = 0
-        start = start_time
-        end = end_time
-        while start < end:
-            cur = start.strftime("%Y%m%d")
-            filepath = f"{dir_path}/{cur}.csv"
-            if not os.path.exists(filepath):
-                print(f"{filepath} does not exist")
-                start = start + timedelta(days=1)
-                continue
+        for filename in file_list:
+            filepath = f"{dir_path}/{filename}.csv"
             extract_data_from_bigquery_csv(filepath, repo)
-            print(f"{filepath} process done")
-            start = start + timedelta(days=1)
-            index += 1
-        print(f"repo#{repo} process done, 共处理{index}份文件")
+        print(f"repo#{repo} process done")
 
 
 if __name__ == '__main__':
@@ -105,10 +96,8 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split('#')
-    start_time = datetime.strptime(params[1], "%Y-%m-%d")
-    end_time = datetime.strptime(params[2], "%Y-%m-%d")
-    dir_path = params[3]
+    projects = params[0].split(',')
+    dir_path = params[1]
 
     # 执行
-    auto_process(projects, start_time, end_time, dir_path)
+    auto_process(projects, dir_path)

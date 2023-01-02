@@ -1,4 +1,4 @@
-package com.nju.apcd.pojo.param;
+package com.nju.apcd.pojo;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -8,15 +8,14 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@TableName("process_event")
-public class EventLog {
+@AllArgsConstructor
+@TableName("permission_change")
+public class PermissionChange {
     private Long id;
     private String repo;
-    private Integer prNumber;
-    private String activity;
-    private Date createdAt;
     private String people;
-    private String scene;
+    private String prNumber;
+    private Date changeTime;
+    private String permission;
 }

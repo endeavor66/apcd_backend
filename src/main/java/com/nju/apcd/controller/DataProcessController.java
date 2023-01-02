@@ -20,13 +20,19 @@ public class DataProcessController {
     /**
      * 上传日志文件
      * @param fileList
-     * @param project
      * @return
      */
     @PostMapping("/upload-event-log")
-    public String uploadEventLog(@RequestParam("fileList") List<MultipartFile> fileList,
-                     @RequestParam("project") String project) {
-        ServerResponse result = dataProcessService.uploadEventLog(fileList, project);
+    public String uploadEventLog(@RequestParam("fileList") List<MultipartFile> fileList) {
+        ServerResponse result = dataProcessService.uploadEventLog(fileList);
+        return JSON.toJSONString(result);
+    }
+
+    @PostMapping("/data-preprocess")
+    public String dataPreprocess(@RequestParam("projectList") List<String> projectList,
+                                 @RequestParam("start") String start,
+                                 @RequestParam("end") String end){
+        ServerResponse result = dataProcessService.dataPreprocess(projectList, start, end);
         return JSON.toJSONString(result);
     }
 

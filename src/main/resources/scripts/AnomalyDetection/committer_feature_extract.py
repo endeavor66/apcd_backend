@@ -131,7 +131,7 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split('#')
+    projects = params[0].split(',')
     start = datetime.strptime(params[1], "%Y-%m-%d")
     end = datetime.strptime(params[2], "%Y-%m-%d")
     DATA_DIR = params[3]

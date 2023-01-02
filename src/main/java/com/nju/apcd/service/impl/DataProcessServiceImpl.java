@@ -1,39 +1,43 @@
 package com.nju.apcd.service.impl;
 
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.nju.apcd.constant.Constants;
 import com.nju.apcd.mapper.EventLogMapper;
+import com.nju.apcd.mapper.PermissionChangeMapper;
 import com.nju.apcd.mapper.UploadRecordMapper;
-import com.nju.apcd.pojo.param.EventLog;
-import com.nju.apcd.pojo.param.EventLogQueryParam;
 import com.nju.apcd.pojo.ServerResponse;
 import com.nju.apcd.pojo.UploadRecord;
+import com.nju.apcd.pojo.param.EventLogQueryParam;
+import com.nju.apcd.pojo.param.PermissionQueryParam;
 import com.nju.apcd.service.DataProcessService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nju.apcd.utils.ScriptUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class DataProcessServiceImpl implements DataProcessService {
 
-    @Autowired
+    @Resource
     UploadRecordMapper uploadRecordMapper;
 
-    @Autowired
+    @Resource
     EventLogMapper eventLogMapper;
+
+    @Resource
+    PermissionChangeMapper permissionChangeMapper;
 
     /**
      * 上传文件，保存到服务器
-     * @param fileList
-     * @param project
-     * @return
+     * @param fileList 文件列表
+     * @return 传输结果消息
      */
     @Override
-    public ServerResponse uploadEventLog(List<MultipartFile> fileList, String project) {
+    public ServerResponse uploadEventLog(List<MultipartFile> fileList) {
         if (fileList == null || fileList.size() == 0) {
             return ServerResponse.fail("文件列表为空");
         }
@@ -75,7 +79,7 @@ public class DataProcessServiceImpl implements DataProcessService {
 
     /**
      * 获取所有上传记录
-     * @return
+     * @return 上传记录
      */
     @Override
     public ServerResponse getUploadRecord() {
@@ -99,11 +103,38 @@ public class DataProcessServiceImpl implements DataProcessService {
         return null;
     }
 
+    @Override
+    public ServerResponse getPermission(PermissionQueryParam param) {
+        return null;
+    }
+
+    @Override
+    public ServerResponse dataPreprocess(List<String> projectList, String start, String end) {
+        // 1.从bigquery中提取指定项目的信息，存到bigquery_data目录
+        ScriptUtil.data_extract_from_bigquery(projectList);
+
+        // 2.将bigquery_data数据存到数据库repo_event
+        ScriptUtil.bigquery_process(projectList, start, end);
+
+        // 3.加工event_log，保存到process_event
+        ScriptUtil.event_process(projectList);
+
+        // 4.计算权限变更信息，保存到permission_change
+        ScriptUtil.permission_change(projectList);
+
+        // 5.计算各角色的特征信息，保存到数据库
+        ScriptUtil.committer_feature_extract(projectList, start, end);
+        ScriptUtil.reviewer_feature_extract(projectList, start, end);
+        ScriptUtil.maintainer_feature_extract(projectList, start, end);
+
+        return ServerResponse.ok("数据预处理完成");
+    }
+
     /**
      * 文件保存到本地
-     * @param file
-     * @param fileName
-     * @throws Exception
+     * @param file 文件二进制流
+     * @param fileName 文件名
+     * @throws Exception IO异常
      */
     public void uploadFile(byte[] file, String fileName) throws Exception {
         String filePath = Constants.BIGQUERY_DATA_DIR + "/" + fileName;
@@ -112,6 +143,4 @@ public class DataProcessServiceImpl implements DataProcessService {
         out.flush();
         out.close();
     }
-
-
 }

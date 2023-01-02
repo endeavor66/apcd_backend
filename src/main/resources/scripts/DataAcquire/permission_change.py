@@ -3,6 +3,7 @@ import os
 from typing import List
 from datetime import datetime, timedelta
 from utils.pr_self_utils import get_all_pr_number_between
+from utils.mysql_utils import batch_insert_into_permission_change
 
 
 '''
@@ -55,6 +56,27 @@ def cal_unfork_pr_list(repo: str):
 
 
 '''
+功能：权限变更识别流程自动化
+'''
+def auto_analysis(repo: str):
+    output_path = f"{ROLE_CHANGE_DIR}/{repo}_role_change.csv"
+    role_change = []
+
+    # 获取unfork_pr_list
+    unfork_pr_list = cal_unfork_pr_list(repo)
+
+    # 读取log文件，识别权限变更信息
+    input_path = f"{LOG_ALL_SCENE_DIR}/{repo}.csv"
+    result = permission_change(input_path, unfork_pr_list)
+    role_change.extend(result)
+
+    # 保存为文件
+    df_file = pd.DataFrame(data=role_change, columns=['people', 'change_pr_number', 'change_role_time', 'change_role'])
+    df_file.to_csv(output_path, index=False, header=True)
+
+
+
+'''
 功能：确定一个特定的person在权限发生变更之后一段时间内所参与的所有PR，(并在这些PR中使用了新的权限)
 '''
 def cal_involved_pr(repo: str, person: str, change_role_time: datetime):
@@ -80,24 +102,25 @@ def cal_involved_pr_after_permission_change(repo: str):
     df_role_change.to_csv(role_change_path, index=False, header=True)
 
 
-'''
-功能：权限变更识别流程自动化
-'''
-def auto_analysis(repo: str):
-    output_path = f"{ROLE_CHANGE_DIR}/{repo}_role_change.csv"
-    role_change = []
+# 将权限变更信息保存到数据库 permission_change
+def save(repo: str):
+    filepath = f"{ROLE_CHANGE_DIR}/{repo}_role_change.csv"
+    if not os.path.exists(filepath):
+        print(f"{filepath} don't exist")
+        return
 
-    # 获取unfork_pr_list
-    unfork_pr_list = cal_unfork_pr_list(repo)
-
-    # 读取log文件，识别权限变更信息
-    input_path = f"{LOG_ALL_SCENE_DIR}/{repo}.csv"
-    result = permission_change(input_path, unfork_pr_list)
-    role_change.extend(result)
-
-    # 保存为文件
-    df_file = pd.DataFrame(data=role_change, columns=['people', 'change_pr_number', 'change_role_time', 'change_role'])
-    df_file.to_csv(output_path, index=False, header=True)
+    df = pd.read_csv(filepath)
+    datas = []
+    for index, row in df.iterrows():
+        t = (
+            repo,
+            row['people'],
+            row['change_pr_number'],
+            row['change_role_time'],
+            row['change_role']
+        )
+        datas.append(t)
+    batch_insert_into_permission_change(repo, datas)
 
 
 if __name__ == '__main__':
@@ -108,7 +131,7 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    pro = params[0]
+    projects = params[0].split(',')
     DATA_DIR = params[1]
 
     # 文件路径
@@ -116,7 +139,10 @@ if __name__ == '__main__':
     LOG_ALL_SCENE_DIR = DATA_DIR + "/log_all_scene"
     ROLE_CHANGE_DIR = DATA_DIR + "/role_change"
 
-    repo = pro.split('/')[1]
-    auto_analysis(repo)
-    cal_involved_pr_after_permission_change(repo)
-    print(f"repo#{repo} process done")
+    # 执行
+    for pro in projects:
+        repo = pro.split('/')[1]
+        auto_analysis(repo)
+        cal_involved_pr_after_permission_change(repo)
+        save(repo)
+        print(f"repo#{repo} process done")
