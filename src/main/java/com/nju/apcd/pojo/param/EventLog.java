@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("process_event")
+@TableName("process_events")
 public class EventLog {
     private Long id;
     private String repo;

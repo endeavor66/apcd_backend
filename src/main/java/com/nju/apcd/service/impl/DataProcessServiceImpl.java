@@ -2,6 +2,7 @@ package com.nju.apcd.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nju.apcd.constant.Constants;
 import com.nju.apcd.mapper.EventLogMapper;
 import com.nju.apcd.mapper.UploadRecordMapper;
@@ -86,17 +87,19 @@ public class DataProcessServiceImpl implements DataProcessService {
     @Override
     public ServerResponse getEventLog(EventLogQueryParam param) {
         // TODO 根据传入的参数，分页查询(注：参数值允许为NULL，表明不添加到查询条件集合)
-        //Map<String, Object> map = new HashMap<>();
-        //if(StrUtil.isNotBlank(param.getProject())){
-        //    map.put("repo", param.getProject());
-        //}
-        //if(StrUtil.isNotBlank(param.getPrNumber())){
-        //    map.put("repo", param.getProject());
-        //}
-        //if(StrUtil.isNotBlank(param.getScene())){
-        //    map.put("repo", param.getProject());
-        //}
-        return null;
+        QueryWrapper<EventLog> queryWrapper = new QueryWrapper<>();
+        if(StrUtil.isNotBlank(param.getProject())){
+            queryWrapper.like("repo",param.getProject());
+        }
+        if(StrUtil.isNotBlank(param.getScene())){
+            queryWrapper.like("Scene",param.getScene());
+        }
+        if(StrUtil.isNotBlank(param.getPrNumber())){
+            queryWrapper.eq("PrNumber",param.getPrNumber());
+        }
+        Page<EventLog> page=new Page<EventLog>(Long.parseLong(param.getCurrentPage()),Long.parseLong(param.getPageSize()));
+        eventLogMapper.selectPage(page, queryWrapper);
+        return ServerResponse.ok(page);
     }
 
     /**
