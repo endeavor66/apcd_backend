@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from utils.mysql_utils import select_all, select_one
 from utils.time_utils import time_reverse
 from utils.pr_self_utils import get_all_pr_number_between, get_pr_attributes
-from DataAcquire.Config import *
+from Config import *
 
 '''
 功能：在events表中找到payload.ref(新建分支名)==branch的CreateEvent(最接近pr_open_time的一条记录)
@@ -153,12 +153,6 @@ def search_pr_events(owner: str, repo: str, pr_number: int, pr_attributes: dict)
     # 4.从events表中提取PR相关事件: PullRequestEvent、PullRequestReviewEvent、PullRequestReviewCommentEvent、IssueCommentEvent
     events = get_pr_events(owner, repo, pr_number)
     pr_events.extend(events)
-    # 5.保存为中间文件temp_data
-    df = pd.DataFrame(data=pr_events)
-    df['pr_number'] = pr_number
-    filepath = f"{TEMP_DATA_DIR}/{repo}.csv"
-    header = not os.path.exists(filepath)
-    df.to_csv(filepath, header=header, index=False, mode='a')
     return pr_events
 
 
@@ -215,7 +209,7 @@ def process_pr_events(pr_events: List, pr_state: bool, pr_number: int, filepath:
 功能：根据PR的类型，选择不同的文件路径保存
 '''
 def get_filepath(repo: str, pr_state: bool, is_fork: bool) -> str:
-    filepath = f"{EVENT_LOG_DIR}/{repo}"
+    filepath = f"{dir_path}/{repo}"
     if is_fork and pr_state:
         filepath = filepath + "_fork_merge.csv"
     elif is_fork and (not pr_state):
@@ -253,19 +247,10 @@ def auto_process_for_single_pr(owner: str, repo: str, pr_number: int):
     print(f"PR#{pr_number} process done")
 
 
-def auto_process():
-    projects = ['openzipkin/zipkin', 'apache/netbeans',
-                # 'opencv/opencv', 'apache/dubbo', 'phoenixframework/phoenix',
-                # 'ARM-software/arm-trusted-firmware', 'apache/zookeeper',
-                # 'spring-projects/spring-framework', 'spring-cloud/spring-cloud-function',
-                # 'vim/vim', 'gpac/gpac', 'ImageMagick/ImageMagick', 'apache/hadoop',
-                # 'libexpat/libexpat', 'apache/httpd', 'madler/zlib', 'redis/redis', 'stefanberger/swtpm'
-                ]
+def auto_process(projects, start, end):
     for pro in projects:
         owner = pro.split('/')[0]
         repo = pro.split('/')[1]
-        start = datetime(2021, 1, 1)
-        end = datetime(2022, 7, 1)
         pr_number_list = get_all_pr_number_between(repo, start, end)
         total = len(pr_number_list)
         index = 1
@@ -277,4 +262,17 @@ def auto_process():
 
 
 if __name__ == '__main__':
-    auto_process()
+    import sys
+
+    params = []
+    for i in range(1, len(sys.argv)):
+        params.append((sys.argv[i]))
+
+    # 解析参数
+    projects = params[0].split('#')
+    start = datetime.strptime(params[1], "%Y-%m-%d")
+    end = datetime.strptime(params[2], "%Y-%m-%d")
+    dir_path = params[3]
+
+    # 执行
+    auto_process(projects, start, end)
