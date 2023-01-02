@@ -12,11 +12,19 @@ public class ServerResponse {
     // 构造方法设为私有
     private ServerResponse() {}
 
-    public static ServerResponse ok(Object params) {
+    public static ServerResponse ok(Object data) {
+        return ok(ResultEnum.OK.getMessage(), data);
+    }
+
+    public static ServerResponse ok(String message) {
+        return ok(message, null);
+    }
+
+    public static ServerResponse ok(String message, Object data) {
         ServerResponse serverResponse = new ServerResponse();
         serverResponse.setCode(ResultEnum.OK.getCode());
-        serverResponse.setMessage(ResultEnum.OK.getMessage()); // 成功展示默认提示信息
-        serverResponse.setData(params); // 返回传入的参数
+        serverResponse.setMessage(message); // 成功展示默认提示信息
+        serverResponse.setData(data);
         return serverResponse;
     }
 

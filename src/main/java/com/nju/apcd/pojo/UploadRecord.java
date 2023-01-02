@@ -11,8 +11,10 @@ import java.util.Date;
 @NoArgsConstructor
 public class UploadRecord {
     private Long id;
-    private Integer fileNumber;
-    private String fileName;
+    private Integer successFileNumber;
+    private String successFileName;
+    private Integer errorFileNumber;
+    private String errorFileName;
     private Date operateTime;
     private String operator;
 }
