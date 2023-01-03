@@ -98,7 +98,8 @@ public class DataProcessServiceImpl implements DataProcessService {
             queryWrapper.eq("PrNumber",param.getPrNumber());
         }
         Page<EventLog> page=new Page<EventLog>(Long.parseLong(param.getCurrentPage()),Long.parseLong(param.getPageSize()));
-        eventLogMapper.selectPage(page, queryWrapper);
+        Page<EventLog> eventLogPage = eventLogMapper.selectPage(page, queryWrapper);
+
         return ServerResponse.ok(page);
     }
 
