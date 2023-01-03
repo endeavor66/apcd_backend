@@ -1,0 +1,8 @@
+CaseID,StartTimestamp,Activity,People
+1678,2021-01-11 15:23:47,CreateBranch,aureliendavid
+1678,2021-02-24 17:34:46,DeleteBranch,jeanlf
+1678,2021-01-11 15:49:56,SubmitCommit,aureliendavid
+1678,2021-01-12 09:59:30,SubmitCommit,aureliendavid
+1678,2021-01-12 10:25:04,SubmitCommit,aureliendavid
+1678,2021-01-11 17:15:12,OpenPR,aureliendavid
+1678,2021-01-13 10:07:17,MergePR,aureliendavid

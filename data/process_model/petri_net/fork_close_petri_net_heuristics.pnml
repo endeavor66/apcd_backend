@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text></text>
+    </name>
+    <page id="n0">
+      <place id="source0">
+        <name>
+          <text>source0</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="pre_SubmitCommit">
+        <name>
+          <text>pre_SubmitCommit</text>
+        </name>
+      </place>
+      <place id="pre_ClosePR">
+        <name>
+          <text>pre_ClosePR</text>
+        </name>
+      </place>
+      <place id="intplace_ClosePR">
+        <name>
+          <text>intplace_ClosePR</text>
+        </name>
+      </place>
+      <place id="pre_CreateBranch">
+        <name>
+          <text>pre_CreateBranch</text>
+        </name>
+      </place>
+      <place id="sink0">
+        <name>
+          <text>sink0</text>
+        </name>
+      </place>
+      <place id="intplace_SubmitCommit">
+        <name>
+          <text>intplace_SubmitCommit</text>
+        </name>
+      </place>
+      <place id="pre_Revise">
+        <name>
+          <text>pre_Revise</text>
+        </name>
+      </place>
+      <place id="intplace_OpenPR">
+        <name>
+          <text>intplace_OpenPR</text>
+        </name>
+      </place>
+      <place id="pre_OpenPR">
+        <name>
+          <text>pre_OpenPR</text>
+        </name>
+      </place>
+      <place id="intplace_Revise">
+        <name>
+          <text>intplace_Revise</text>
+        </name>
+      </place>
+      <transition id="hid_21">
+        <name>
+          <text>hid_21</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="8e8f39f5-27ca-4069-ade6-ded2bd0a3327"/>
+      </transition>
+      <transition id="DeleteBranch">
+        <name>
+          <text>DeleteBranch</text>
+        </name>
+      </transition>
+      <transition id="hid_19">
+        <name>
+          <text>hid_19</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="1db01576-c5f9-46a4-bcce-50a347c33094"/>
+      </transition>
+      <transition id="SubmitCommit">
+        <name>
+          <text>SubmitCommit</text>
+        </name>
+      </transition>
+      <transition id="hid_14">
+        <name>
+          <text>hid_14</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="d59ceffe-e967-4fd9-ace3-c76f295d0828"/>
+      </transition>
+      <transition id="hid_16">
+        <name>
+          <text>hid_16</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="8878b3e3-7c73-405d-a0db-bc7191fb5254"/>
+      </transition>
+      <transition id="CreateBranch">
+        <name>
+          <text>CreateBranch</text>
+        </name>
+      </transition>
+      <transition id="hid_2">
+        <name>
+          <text>hid_2</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="fa110913-7751-41f4-b9e9-a51515d10f41"/>
+      </transition>
+      <transition id="hid_7">
+        <name>
+          <text>hid_7</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="56aa834e-e2c2-4f96-beaf-d439dc9afa3f"/>
+      </transition>
+      <transition id="OpenPR">
+        <name>
+          <text>OpenPR</text>
+        </name>
+      </transition>
+      <transition id="hid_15">
+        <name>
+          <text>hid_15</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="6c6d74a6-c463-43fa-88c3-b63c2631eebd"/>
+      </transition>
+      <transition id="hid_17">
+        <name>
+          <text>hid_17</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="ccbb12b6-5dac-49f3-8829-032cedd8c313"/>
+      </transition>
+      <transition id="Revise">
+        <name>
+          <text>Revise</text>
+        </name>
+      </transition>
+      <transition id="hid_20">
+        <name>
+          <text>hid_20</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="eee369c5-365d-4ecb-b6a0-5f0ff24aa772"/>
+      </transition>
+      <transition id="ClosePR">
+        <name>
+          <text>ClosePR</text>
+        </name>
+      </transition>
+      <transition id="ForkRepository">
+        <name>
+          <text>ForkRepository</text>
+        </name>
+      </transition>
+      <arc id="3244364204160" source="intplace_OpenPR" target="hid_14"/>
+      <arc id="3244364204928" source="intplace_SubmitCommit" target="hid_16"/>
+      <arc id="3244364161424" source="source0" target="hid_2"/>
+      <arc id="3244364163728" source="source0" target="hid_7"/>
+      <arc id="3244364202768" source="source0" target="ForkRepository"/>
+      <arc id="3244364228112" source="hid_20" target="pre_ClosePR"/>
+      <arc id="3244364204448" source="intplace_OpenPR" target="hid_15"/>
+      <arc id="3244364205216" source="intplace_SubmitCommit" target="hid_17"/>
+      <arc id="3244364161712" source="pre_OpenPR" target="OpenPR"/>
+      <arc id="3244364228016" source="hid_16" target="pre_OpenPR"/>
+      <arc id="3244364228400" source="intplace_ClosePR" target="DeleteBranch"/>
+      <arc id="3244364226864" source="DeleteBranch" target="sink0"/>
+      <arc id="3244364227008" source="intplace_Revise" target="hid_20"/>
+      <arc id="3244364205408" source="ClosePR" target="intplace_ClosePR"/>
+      <arc id="3244342952528" source="pre_CreateBranch" target="CreateBranch"/>
+      <arc id="3244364227920" source="CreateBranch" target="pre_OpenPR"/>
+      <arc id="3244364162768" source="pre_SubmitCommit" target="SubmitCommit"/>
+      <arc id="3244364227536" source="CreateBranch" target="pre_SubmitCommit"/>
+      <arc id="3244364165072" source="pre_Revise" target="Revise"/>
+      <arc id="3244364206032" source="hid_19" target="sink0"/>
+      <arc id="3244364226768" source="Revise" target="intplace_Revise"/>
+      <arc id="3244364228304" source="hid_21" target="pre_Revise"/>
+      <arc id="3244364164064" source="pre_ClosePR" target="ClosePR"/>
+      <arc id="3244342952672" source="hid_14" target="pre_ClosePR"/>
+      <arc id="3244364161520" source="hid_2" target="pre_CreateBranch"/>
+      <arc id="3244364163824" source="hid_7" target="pre_SubmitCommit"/>
+      <arc id="3244364227824" source="ForkRepository" target="pre_CreateBranch"/>
+      <arc id="3244364204016" source="OpenPR" target="intplace_OpenPR"/>
+      <arc id="3244364204784" source="SubmitCommit" target="intplace_SubmitCommit"/>
+      <arc id="3244364205936" source="intplace_ClosePR" target="hid_19"/>
+      <arc id="3244342952816" source="hid_17" target="pre_SubmitCommit"/>
+      <arc id="3244364228208" source="hid_15" target="pre_Revise"/>
+      <arc id="3244364227296" source="intplace_Revise" target="hid_21"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink0">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

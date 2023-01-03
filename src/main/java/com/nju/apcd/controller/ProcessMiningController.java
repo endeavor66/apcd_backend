@@ -29,7 +29,7 @@ public class ProcessMiningController {
      * @param scene 场景
      * @param algorithm 过程发现算法
      * @param param 算法参数
-     * @return
+     * @return 执行结果
      */
     @PostMapping("/process-discovery")
     public String processDiscovery(@RequestParam("projectList") List<String> projectList,

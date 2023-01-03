@@ -1,9 +1,14 @@
 package com.nju.apcd.service.impl;
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nju.apcd.constant.Constants;
 import com.nju.apcd.mapper.EventLogMapper;
 import com.nju.apcd.mapper.PermissionChangeMapper;
 import com.nju.apcd.mapper.UploadRecordMapper;
+import com.nju.apcd.pojo.EventLog;
+import com.nju.apcd.pojo.PageResult;
 import com.nju.apcd.pojo.ServerResponse;
 import com.nju.apcd.pojo.UploadRecord;
 import com.nju.apcd.pojo.param.EventLogQueryParam;
@@ -18,6 +23,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DataProcessServiceImpl implements DataProcessService {
@@ -89,18 +95,25 @@ public class DataProcessServiceImpl implements DataProcessService {
 
     @Override
     public ServerResponse getEventLog(EventLogQueryParam param) {
-        // TODO 根据传入的参数，分页查询(注：参数值允许为NULL，表明不添加到查询条件集合)
-        //Map<String, Object> map = new HashMap<>();
-        //if(StrUtil.isNotBlank(param.getProject())){
-        //    map.put("repo", param.getProject());
-        //}
-        //if(StrUtil.isNotBlank(param.getPrNumber())){
-        //    map.put("repo", param.getProject());
-        //}
-        //if(StrUtil.isNotBlank(param.getScene())){
-        //    map.put("repo", param.getProject());
-        //}
-        return null;
+        // 构造查询参数，分页查询(注：参数值允许为NULL，表明不添加到查询条件集合)
+        QueryWrapper<EventLog> queryWrapper = new QueryWrapper<>();
+        if(StrUtil.isNotBlank(param.getProject())){
+            queryWrapper.like("repo", param.getProject());
+        }
+        if(StrUtil.isNotBlank(param.getPrNumber())){
+            queryWrapper.eq("pr_number", Integer.parseInt(param.getPrNumber()));
+        }
+        if(StrUtil.isNotBlank(param.getScene())){
+            queryWrapper.like("scene", param.getScene());
+        }
+        Page<EventLog> page = Page.of(Long.parseLong(param.getCurrentPage()), Long.parseLong(param.getPageSize()));
+        // 分页查询
+        Page<EventLog> result = eventLogMapper.selectPage(page, queryWrapper);
+        // 构造返回结果
+        PageResult<EventLog> pageResult = new PageResult<>();
+        pageResult.setRecords(result.getRecords());
+        pageResult.setTotal(result.getTotal());
+        return ServerResponse.ok(pageResult);
     }
 
     @Override
