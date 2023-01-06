@@ -14,7 +14,7 @@ public interface DataProcessService {
 
     ServerResponse getEventLog(EventLogQueryParam param);
 
-    ServerResponse getPermission(PermissionQueryParam param);
+    ServerResponse dataPreprocess(String projectList, String start, String end);
 
-    ServerResponse dataPreprocess(List<String> projectList, String start, String end);
+    ServerResponse getPermissionChange(PermissionQueryParam param);
 }

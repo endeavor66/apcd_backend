@@ -13,6 +13,6 @@ public class EventLogQueryParam {
     public String prNumber;
 
     // 分页参数
-    public String currentPage;
-    public String pageSize;
+    public Long currentPage;
+    public Long pageSize;
 }

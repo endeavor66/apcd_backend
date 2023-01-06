@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 public class PermissionQueryParam {
     public String project;
     public String scene;
+    public String people;
 
     // 分页参数
-    public String currentPage;
-    public String pageSize;
+    public Long currentPage;
+    public Long pageSize;
 }

@@ -1,23 +1,20 @@
 package com.nju.apcd.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
-import com.nju.apcd.exception.FileUploadFailException;
+import com.nju.apcd.constant.Constants;
 import com.nju.apcd.pojo.ServerResponse;
+import com.nju.apcd.pojo.param.ProcessModelQueryParam;
 import com.nju.apcd.service.ProcessMiningService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
+@RequestMapping("/dev-api")
 public class ProcessMiningController {
 
     @Resource
@@ -25,18 +22,50 @@ public class ProcessMiningController {
 
     /**
      * 构建主流模式
-     * @param projectList 项目列表
-     * @param scene 场景
-     * @param algorithm 过程发现算法
-     * @param param 算法参数
+     * @param param 查询参数
      * @return 执行结果
      */
-    @PostMapping("/process-discovery")
-    public String processDiscovery(@RequestParam("projectList") List<String> projectList,
-                                   @RequestParam("scene") String scene,
-                                   @RequestParam("algorithm") String algorithm,
-                                   @RequestParam("param") String param){
-        ServerResponse result = processMiningService.processDiscovery(projectList, scene, algorithm, param);
+    @PostMapping("/build-process-model")
+    public String processDiscovery(ProcessModelQueryParam param){
+        ServerResponse result = processMiningService.processDiscovery(param);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取主流模式
+     * @param sceneList 场景，如：fork_merge, unfork_close
+     * @param display 呈现形式，如：petriNet, processTree
+     * @return
+     */
+    @PostMapping("/get-process-model")
+    public String getProcessModel(@RequestParam("sceneList") String sceneList,
+                                  @RequestParam("display") String display){
+        // 如果sceneList为空，等价于查询所有场景
+        String[] sceneArr = Constants.SCENE_LIST;
+        if(!StrUtil.isBlank(sceneList)){
+            sceneArr = sceneList.split(",");
+        }
+        ServerResponse result = processMiningService.getProcessModel(sceneArr, display);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 执行一致性检验
+     * @param project
+     * @param algorithm
+     * @return
+     */
+    @PostMapping("/conformance-check")
+    public String conformanceCheck(@RequestParam("project") String project,
+                                   @RequestParam("algorithm") String algorithm){
+        ServerResponse result = processMiningService.conformanceCheck(project, algorithm);
+        return JSON.toJSONString(result);
+    }
+
+    @PostMapping("/get-conformance-check-result")
+    public String getConformanceCheckResult(@RequestParam("project") String project,
+                                            @RequestParam("algorithm") String algorithm){
+        ServerResponse result = processMiningService.getConformanceCheckResult(project, algorithm);
         return JSON.toJSONString(result);
     }
 }

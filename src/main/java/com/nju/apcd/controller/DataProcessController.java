@@ -3,6 +3,7 @@ package com.nju.apcd.controller;
 import com.alibaba.fastjson.JSON;
 import com.nju.apcd.pojo.param.EventLogQueryParam;
 import com.nju.apcd.pojo.ServerResponse;
+import com.nju.apcd.pojo.param.PermissionQueryParam;
 import com.nju.apcd.service.DataProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +30,12 @@ public class DataProcessController {
     }
 
     @PostMapping("/data-preprocess")
-    public String dataPreprocess(@RequestParam("projectList") List<String> projectList,
+    public String dataPreprocess(@RequestParam("projectList") String projectList,
                                  @RequestParam("start") String start,
                                  @RequestParam("end") String end){
+        System.out.println(projectList);
+        System.out.println(start);
+        System.out.println(end);
         ServerResponse result = dataProcessService.dataPreprocess(projectList, start, end);
         return JSON.toJSONString(result);
     }
@@ -51,6 +55,12 @@ public class DataProcessController {
     @PostMapping("/get-event-log")
     public String getEventLog(EventLogQueryParam param) {
         ServerResponse result = dataProcessService.getEventLog(param);
-        return JSON.toJSONString(ServerResponse.ok(result));
+        return JSON.toJSONString(result);
+    }
+
+    @PostMapping("/get-permission-change")
+    public String getPermissionChange(PermissionQueryParam param){
+        ServerResponse result = dataProcessService.getPermissionChange(param);
+        return JSON.toJSONString(result);
     }
 }

@@ -4,7 +4,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn import svm
 from sklearn.preprocessing import MinMaxScaler
-from AnomalyDetection.Config import *
+from Config import *
 import os
 from typing import List
 
@@ -163,9 +163,9 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split('#')
-    roles = params[1].split('#')
-    algorithms = params[2].split('#')
+    pro = params[0]
+    roles = params[1].split(',')
+    algorithms = params[2].split(',')
     DATA_DIR = params[3]
 
     # 文件目录
@@ -173,10 +173,11 @@ if __name__ == '__main__':
     ISOLATION_FOREST_DIR = DATA_DIR + '/anomaly_detection/isolation_forest'
     ONE_CLASS_SVM_DIR = DATA_DIR + '/anomaly_detection/one_class_svm'
     LOF_DIR = DATA_DIR + '/anomaly_detection/lof'
-    BOX_PLOT_DIR = DATA_DIR + '/anomaly_detection/lof/box_plot'
+    BOX_PLOT_DIR = DATA_DIR + '/anomaly_detection/box_plot'
 
-    for pro in projects:
-        repo = pro.split('/')[1]
-        for role in roles:
-            anomaly_detection(repo, role, algorithms)
-            print(f"{repo} {role} process done")
+    repo = pro
+    if pro.find("/") != -1:
+        repo = pro[pro.index("/")+1:]
+    for role in roles:
+        anomaly_detection(repo, role, algorithms)
+        print(f"{repo} {role} process done")

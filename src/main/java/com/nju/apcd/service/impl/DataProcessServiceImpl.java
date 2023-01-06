@@ -7,10 +7,7 @@ import com.nju.apcd.constant.Constants;
 import com.nju.apcd.mapper.EventLogMapper;
 import com.nju.apcd.mapper.PermissionChangeMapper;
 import com.nju.apcd.mapper.UploadRecordMapper;
-import com.nju.apcd.pojo.EventLog;
-import com.nju.apcd.pojo.PageResult;
-import com.nju.apcd.pojo.ServerResponse;
-import com.nju.apcd.pojo.UploadRecord;
+import com.nju.apcd.pojo.*;
 import com.nju.apcd.pojo.param.EventLogQueryParam;
 import com.nju.apcd.pojo.param.PermissionQueryParam;
 import com.nju.apcd.service.DataProcessService;
@@ -23,7 +20,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DataProcessServiceImpl implements DataProcessService {
@@ -84,8 +80,8 @@ public class DataProcessServiceImpl implements DataProcessService {
     }
 
     /**
-     * 获取所有上传记录
-     * @return 上传记录
+     * 获取所有历史上传记录
+     * @return 历史上传记录
      */
     @Override
     public ServerResponse getUploadRecord() {
@@ -93,21 +89,26 @@ public class DataProcessServiceImpl implements DataProcessService {
         return ServerResponse.ok(uploadRecords);
     }
 
+    /**
+     * 获取处理好的事件日志
+     * @param param 查询参数
+     * @return 查询结果
+     */
     @Override
     public ServerResponse getEventLog(EventLogQueryParam param) {
-        // 构造查询参数，分页查询(注：参数值允许为NULL，表明不添加到查询条件集合)
+        // 构造查询参数(注：参数值允许为NULL，表明不添加到查询条件集合)
         QueryWrapper<EventLog> queryWrapper = new QueryWrapper<>();
         if(StrUtil.isNotBlank(param.getProject())){
             queryWrapper.like("repo", param.getProject());
         }
-        if(StrUtil.isNotBlank(param.getPrNumber())){
-            queryWrapper.eq("pr_number", Integer.parseInt(param.getPrNumber()));
-        }
         if(StrUtil.isNotBlank(param.getScene())){
             queryWrapper.like("scene", param.getScene());
         }
-        Page<EventLog> page = Page.of(Long.parseLong(param.getCurrentPage()), Long.parseLong(param.getPageSize()));
+        if(StrUtil.isNotBlank(param.getPrNumber())){
+            queryWrapper.eq("pr_number", Integer.parseInt(param.getPrNumber()));
+        }
         // 分页查询
+        Page<EventLog> page = Page.of(param.getCurrentPage(), param.getPageSize());
         Page<EventLog> result = eventLogMapper.selectPage(page, queryWrapper);
         // 构造返回结果
         PageResult<EventLog> pageResult = new PageResult<>();
@@ -116,13 +117,15 @@ public class DataProcessServiceImpl implements DataProcessService {
         return ServerResponse.ok(pageResult);
     }
 
+    /**
+     * 数据预处理。TODO 后续考虑将数据预处理拆分为多个步骤，这样就能做到前端页面展示哪些步骤处理成功，哪些步骤处理失败
+     * @param projectList 项目列表
+     * @param start 起始时间
+     * @param end 结束时间
+     * @return 处理结果
+     */
     @Override
-    public ServerResponse getPermission(PermissionQueryParam param) {
-        return null;
-    }
-
-    @Override
-    public ServerResponse dataPreprocess(List<String> projectList, String start, String end) {
+    public ServerResponse dataPreprocess(String projectList, String start, String end) {
         // 1.从bigquery中提取指定项目的信息，存到bigquery_data目录
         ScriptUtil.data_extract_from_bigquery(projectList);
 
@@ -135,13 +138,32 @@ public class DataProcessServiceImpl implements DataProcessService {
         // 4.计算权限变更信息，保存到permission_change
         ScriptUtil.permission_change(projectList);
 
-        // 5.计算各角色的特征信息，保存到数据库
-        ScriptUtil.committer_feature_extract(projectList, start, end);
-        ScriptUtil.reviewer_feature_extract(projectList, start, end);
-        ScriptUtil.maintainer_feature_extract(projectList, start, end);
-
         return ServerResponse.ok("数据预处理完成");
     }
+
+    @Override
+    public ServerResponse getPermissionChange(PermissionQueryParam param) {
+        // 构造查询参数(注：参数值允许为NULL，表明不添加到查询条件集合)
+        QueryWrapper<PermissionChange> queryWrapper = new QueryWrapper<>();
+        if(StrUtil.isNotBlank(param.getProject())){
+            queryWrapper.like("repo", param.getProject());
+        }
+        if(StrUtil.isNotBlank(param.getScene())){
+            queryWrapper.like("permission", param.getScene());
+        }
+        if(StrUtil.isNotBlank(param.getPeople())){
+            queryWrapper.like("people", param.getPeople());
+        }
+        // 分页查询
+        Page<PermissionChange> page = Page.of(param.getCurrentPage(), param.getPageSize());
+        Page<PermissionChange> result = permissionChangeMapper.selectPage(page, queryWrapper);
+        // 构造返回结果
+        PageResult<PermissionChange> pageResult = new PageResult<>();
+        pageResult.setRecords(result.getRecords());
+        pageResult.setTotal(result.getTotal());
+        return ServerResponse.ok(pageResult);
+    }
+
 
     /**
      * 文件保存到本地

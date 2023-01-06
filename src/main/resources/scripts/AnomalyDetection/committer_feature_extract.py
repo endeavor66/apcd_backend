@@ -131,7 +131,7 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split(',')
+    pro = params[0]
     start = datetime.strptime(params[1], "%Y-%m-%d")
     end = datetime.strptime(params[2], "%Y-%m-%d")
     DATA_DIR = params[3]
@@ -140,8 +140,9 @@ if __name__ == '__main__':
     FEATURE_DIR = DATA_DIR + '/anomaly_detection/feature'
 
     # 执行
-    for pro in projects:
-        repo = pro.split('/')[1]
-        output_path = f"{FEATURE_DIR}/{repo}_committer_feature.csv"
-        cal_committer_feature(repo, start, end, output_path)
-        print(f"repo#{repo} process done")
+    repo = pro
+    if pro.find("/") != -1:
+        repo = pro[pro.index("/")+1:]
+    output_path = f"{FEATURE_DIR}/{repo}_committer_feature.csv"
+    cal_committer_feature(repo, start, end, output_path)
+    print(f"repo#{repo} process done")

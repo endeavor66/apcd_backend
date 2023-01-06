@@ -5,10 +5,14 @@ import com.nju.apcd.constant.Constants;
 import com.nju.apcd.utils.ScriptUtil;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 public class PythonTest {
     public static void main(String[] args) {
-        reviewer_feature_extract();
+        DecimalFormat df = new DecimalFormat("0.00");
+        String v = "0.99524234";
+        String format = df.format(Double.parseDouble(v));
+        System.out.println(format);
     }
 
     public static void data_extract_from_bigquery(){
@@ -36,8 +40,8 @@ public class PythonTest {
         String scriptPath = file.getPath();
 
         String[] commands = new String[]{
-                "python", scriptPath, "apache/dubbo#gpac/gpac",
-                Constants.EVENT_LOG_DIR, Constants.LOG_ALL_SCENE_DIR, Constants.LOG_SINGLE_SCENE_DIR};
+                "python", scriptPath, "apache/hadoop",
+                Constants.DATA_DIR};
         ScriptUtil.execute_command(commands);
     }
 

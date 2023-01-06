@@ -1,52 +1,8 @@
 import pm4py
 import pandas as pd
 from typing import Union, List, Dict, Any
-from pm4py.objects.log.obj import EventLog
 from Config import *
 from utils.pr_self_utils import get_pr_attributes
-
-
-'''
-功能：Token-based replay 算法
-'''
-def token_based_replay(log: Union[EventLog, pd.DataFrame], petri_net_path: str) -> List[Dict[str, Any]]:
-    net, initial_marking, final_marking = pm4py.read_pnml(petri_net_path)
-    traces = pm4py.conformance_diagnostics_token_based_replay(log, net, initial_marking, final_marking)
-    return traces
-
-
-'''
-功能：Alignments 算法
-'''
-def alignments(log: Union[EventLog, pd.DataFrame], petri_net_path: str) -> List[Dict[str, Any]]:
-    net, initial_marking, final_marking = pm4py.read_pnml(petri_net_path)
-    # pm4py.view_petri_net(net, initial_marking, final_marking)
-    traces = pm4py.conformance_diagnostics_alignments(log, net, initial_marking, final_marking)
-    return traces
-
-
-'''
-功能：对特定项目中的特定场景下的所有案例，进行一致性检查
-'''
-def conformance_checking_for_single_repo(repo: str, scene: str):
-    filename = f"{repo}_{scene}"
-    log_path = f"{LOG_SINGLE_SCENE_DIR}/{filename}.csv"
-    petri_net_path = f"{PETRI_NET_DIR}/{scene}_petri_net.pnml"
-    alignment_path = f"{ALIGNMENT_DIR}/{filename}_alignment.csv"
-
-    log = pd.read_csv(log_path)
-    try:
-        # 合规性检查
-        traces = alignments(log, petri_net_path)
-
-        # 保存结果
-        df = pd.DataFrame(traces)
-        df['case:concept:name'] = log['case:concept:name'].unique()
-        df.to_csv(alignment_path, header=True, index=False)
-        print(f"{filename} process done")
-    except Exception as e:
-        print(e)
-        print(f"{filename} process failed")
 
 
 '''
@@ -95,24 +51,34 @@ def cal_involved_pr_scene(repo: str):
 '''
 功能：根据传入的log，执行一致性检查
 '''
-def conformance_checking(log: Union[pd.DataFrame], repo: str, scene: str):
-    filename = f"{repo}_{scene}"
+def conformance_checking(log: Union[pd.DataFrame], scene: str, algorithm: str):
     petri_net_path = f"{PETRI_NET_DIR}/{scene}_petri_net.pnml"
-
     traces = []
     try:
-        traces = alignments(log, petri_net_path)
+        net, initial_marking, final_marking = pm4py.read_pnml(petri_net_path)
+        if algorithm == 'alignments':
+            traces = pm4py.conformance_diagnostics_alignments(log, net, initial_marking, final_marking)
+        elif algorithm == 'token-based-replay':
+            traces = pm4py.conformance_diagnostics_token_based_replay(log, net, initial_marking, final_marking)
+        else:
+            print("暂不支持的一致性检查算法")
     except Exception as e:
         print(e)
-        print(f"{filename} process failed")
+        print(f"{scene} process failed")
     return traces
 
 
 '''
 功能：自动对权限变更人，在权限变更后的一段时间内参与的所有PR，执行一致性检验
 '''
-def auto_analyse(repo: str):
-    output_path = f"{ALIGNMENT_DIR}/{repo}_alignment.csv"
+def auto_analyse(repo: str, algorithm: str):
+    if algorithm == 'alignments':
+        output_path = f"{ALIGNMENT_DIR}/{repo}_alignments.csv"
+    elif algorithm == 'token-based-replay':
+        output_path = f"{TBR_DIR}/{repo}_tbr.csv"
+    else:
+        print("暂不支持的一致性检查算法")
+        return
 
     # 项目的事件日志
     log_path = f"{LOG_ALL_SCENE_DIR}/{repo}.csv"
@@ -122,7 +88,7 @@ def auto_analyse(repo: str):
     pr_scene = cal_involved_pr_scene(repo)
 
     # 按场景进行一致性检验
-    df_alignment_result = pd.DataFrame()
+    df_result = pd.DataFrame()
     df_scene = pd.DataFrame(data=pr_scene, columns=['people', 'pr_number', 'scene'])
     for person, group_people in df_scene.groupby('people'):
         for scene, group in group_people.groupby('scene'):
@@ -131,16 +97,20 @@ def auto_analyse(repo: str):
             scene_log = df_log.loc[df_log['case:concept:name'].isin(pr_number_list)]
 
             # 执行一致性检查
-            traces = conformance_checking(scene_log, repo, str(scene))
+            traces = conformance_checking(scene_log, str(scene), algorithm)
+
+            if len(traces) == 0:
+                continue
+
             df_traces = pd.DataFrame(data=traces)
             df_traces['people'] = [person] * len(traces)
             df_traces['pr_number'] = scene_log['case:concept:name'].unique()
             df_traces['scene'] = [str(scene)] * len(traces)
 
             # 保存结果
-            df_alignment_result = pd.concat([df_alignment_result, df_traces], ignore_index=True)
+            df_result = pd.concat([df_result, df_traces], ignore_index=True)
 
-    df_alignment_result.to_csv(output_path, index=False, header=True)
+    df_result.to_csv(output_path, index=False, header=True)
 
 
 if __name__ == "__main__":
@@ -152,16 +122,20 @@ if __name__ == "__main__":
 
     # 解析参数
     pro = params[0]
-    DATA_DIR = params[1]
+    algorithm = params[1]
+    DATA_DIR = params[2]
 
     # 文件目录
     LOG_SINGLE_SCENE_DIR = DATA_DIR + "/log_single_scene"
     LOG_ALL_SCENE_DIR = DATA_DIR + "/log_all_scene"
     PETRI_NET_DIR = DATA_DIR + "/process_model/petri_net"
     ROLE_CHANGE_DIR = DATA_DIR + "/role_change"
-    ALIGNMENT_DIR = DATA_DIR + "/alignment"
+    ALIGNMENT_DIR = DATA_DIR + "/conformance_check/alignments"
+    TBR_DIR = DATA_DIR + "/conformance_check/tbr"
 
     # 执行分析
-    repo = pro.split('/')[1]
-    auto_analyse(repo)
+    repo = pro
+    if pro.find("/") != -1:
+        repo = pro[pro.index("/")+1:]
+    auto_analyse(repo, algorithm)
     print(f"repo#{repo} process done")

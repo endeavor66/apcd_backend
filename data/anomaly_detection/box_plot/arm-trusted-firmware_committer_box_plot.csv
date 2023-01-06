@@ -1,0 +1,5 @@
+scene,commit_num,total_line_addition,total_line_deletion,total_file_edit_num,total_file_edit_type,sensitive_line_addition,sensitive_line_deletion,sensitive_file_edit_num,merge_rate,commit_interval
+25%,1.0,2.0,0.5,1.0,1.0,0.0,0.0,0.0,0.0,0.0
+50%,1.5,14.5,1.5,1.5,1.5,0.0,0.0,0.0,0.0,1.9
+75%,3.0,28.0,10.5,3.5,3.5,9.0,1.0,3.0,0.0,212.80416666666665
+mean,2.2,34562.1,34555.0,80.2,8.8,12.0,9.8,1.2,0.0,24717.766666666663

@@ -60,9 +60,9 @@ if __name__ == '__main__':
         params.append((sys.argv[i]))
 
     # 解析参数
-    projects = params[0].split('#')
-    roles = params[1].split('#')
-    algorithms = params[2].split('#')
+    pro = params[0]
+    roles = params[1].split(',')
+    algorithms = params[2].split(',')
     DATA_DIR = params[3]
 
     # 文件目录
@@ -70,10 +70,11 @@ if __name__ == '__main__':
     ISOLATION_FOREST_DIR = DATA_DIR + '/anomaly_detection/isolation_forest'
     ONE_CLASS_SVM_DIR = DATA_DIR + '/anomaly_detection/one_class_svm'
     LOF_DIR = DATA_DIR + '/anomaly_detection/lof'
-    MULTI_MODEL_VOTE_DIR = DATA_DIR + '/anomaly_detection/lof/multi_model_vote'
+    MULTI_MODEL_VOTE_DIR = DATA_DIR + '/anomaly_detection/multi_model_vote'
 
-    for pro in projects:
-        repo = pro.split('/')[1]
-        for role in roles:
-            multi_model_vote(repo, role)
-            print(f"{repo} {role} process done")
+    repo = pro
+    if pro.find("/") != -1:
+        repo = pro[pro.index("/")+1:]
+    for role in roles:
+        multi_model_vote(repo, role)
+        print(f"{repo} {role} process done")

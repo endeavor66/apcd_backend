@@ -16,10 +16,6 @@ public class ServerResponse {
         return ok(ResultEnum.OK.getMessage(), data);
     }
 
-    public static ServerResponse ok(String message) {
-        return ok(message, null);
-    }
-
     public static ServerResponse ok(String message, Object data) {
         ServerResponse serverResponse = new ServerResponse();
         serverResponse.setCode(ResultEnum.OK.getCode());

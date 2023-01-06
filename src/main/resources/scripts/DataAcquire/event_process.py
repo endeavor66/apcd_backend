@@ -3,6 +3,7 @@ import pm4py
 from datetime import datetime
 import os
 from Config import *
+from utils.mysql_utils import batch_insert_into_process_events
 
 
 '''
@@ -59,6 +60,7 @@ def load_data(filepath: str) -> pd.DataFrame:
     # 添加角色列
     # event_log['Role'] = event_log['Activity'].apply(lambda x: cal_role(x))
     # 删除重复列
+    event_log['time:timestamp'] = event_log['time:timestamp'].dt.tz_localize(None)
     event_log.drop(columns=['CaseID', 'Activity', 'StartTimestamp'], inplace=True)
     # 重新组织列的次序
     event_log = event_log[['case:concept:name', 'concept:name', 'time:timestamp', 'People']]
@@ -71,6 +73,26 @@ def load_data(filepath: str) -> pd.DataFrame:
 def log_info(log: pd.DataFrame):
     case_array = log['case:concept:name'].unique()
     print("rest case: %d" % len(case_array))
+
+
+'''
+功能：保存到数据库表 process_event
+'''
+def save(df: pd.DataFrame, scene: str):
+    df['time:timestamp'] = df['time:timestamp'].astype(str)
+    # 保存到数据库
+    datas = []
+    for index, row in df.iterrows():
+        t = (
+            repo,
+            row['case:concept:name'],
+            row['concept:name'],
+            row['time:timestamp'],
+            row['People'],
+            scene
+        )
+        datas.append(t)
+    batch_insert_into_process_events(repo, datas)
 
 
 '''
@@ -132,6 +154,9 @@ def data_preprocess(repo: str):
         # 保存文件
         log.to_csv(output_path, header=True, index=False)
         print(f"{filename} process done\n")
+
+        # 保存到数据库 process_event
+        save(log, t)
 
         # 添加到全场景
         df_all_scene = pd.concat([df_all_scene, log], ignore_index=True)
